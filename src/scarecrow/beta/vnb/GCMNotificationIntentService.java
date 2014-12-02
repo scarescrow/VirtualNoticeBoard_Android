@@ -1,5 +1,6 @@
 package scarecrow.beta.vnb;
 
+import scarecrow.beta.vnb.library.DatabaseHandler;
 import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -56,7 +57,20 @@ public class GCMNotificationIntentService extends IntentService {
 				}
 				Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
 
-				sendNotification(extras.getString("m"));
+				int id = extras.getInt("id");
+				String subject = extras.getString("subject");
+				String message = extras.getString("message");
+				String admin = extras.getString("admin");
+				String date = extras.getString("date");
+				String time = extras.getString("time");
+				
+				DatabaseHandler db = new DatabaseHandler(getApplicationContext());
+				
+				db.addNotices(id, subject, message, admin, date, time);
+				
+				db.close();
+				
+				sendNotification(subject);
 				Log.i(TAG, "Received: " + extras.toString());
 			}
 		}
@@ -69,7 +83,8 @@ public class GCMNotificationIntentService extends IntentService {
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 
 		//To be changed, pending
-		Intent details = new Intent(getApplicationContext(), DashboardActivity.class);
+		
+		Intent details = new Intent(getApplicationContext(), NoticeActivity.class);
 		details.putExtra("subject", msg);
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
 				details, 0);
